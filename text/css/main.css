@@ -2,6 +2,7 @@
 
 :root{
     --site-background-colour: #282828;
+    --site-background-colour-v2: #2e2d2d;
     --site-general-text-colour: #EBDBB2;
     --site-general-text-colour-grey: #c2b9a1;
     --site-secondary-text-colour: #B8BB26;
@@ -97,6 +98,13 @@ c {
   gap: 0.8rem;
   max-width: 20%;
 }
+#navigation {
+  display: flex;
+  height: ;
+}
+#navigation div {
+  background-color: var(--site-background-colour-v2);
+}
 
 #footer {
   display: flex;
@@ -145,6 +153,13 @@ c {
   position: relative;
   padding-top: 0.2rem;
   height: auto;
+}
+#main-container .container:hover:not(.selected-frame) {
+  border-color: var(--site-links-colour);
+}
+#navigation div:hover:not(.selected-item):not(.selected-item > div) {
+  background-color: var(--site-links-colour);
+  color:var(--site-background-colour);
 }
 .middle-container {
   display: flex;
@@ -237,7 +252,13 @@ c {
   width: 100%;
   height: auto;
 }
-
+.selected-frame .decorating-text {
+  color: var(--site-general-text-colour-grey);
+}
+.ascii-art {
+    font-family: monospace;
+    white-space: pre;
+}
 @media screen and (max-width: 768px) {
   body {
     height: 100%;

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<html xmlns:align-items="http://www.w3.org/1999/xhtml" lang="en">
+
+<head>
+    <title>ashley</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-Sscalable=no" />
+    <link rel="stylesheet" href="text/css/main.css" />
+    <link rel="icon" href="https://openclipart.org/image/800px/344819" type="image/png">
+</head>
+
+<body>
+    <div id="main-container">
+        <div id="section-container">
+            <div id="left-section">
+                <div id="pfp" class="container">
+                    <div class="title decorating-text">
+                        <p>Pfp</p>
+                        <div></div>
+                    </div>
+                    <div class="rest">
+                        <div>
+                            <p class="name" style="white-space: pre;">Hai! im <b>ashley</b></p>
+                        </div>
+                        <div class="image-container" style="align-items: right: ;">
+                            <img src="https://cdn.pronouns.cc/users/cvsl78nm985vdppbqfvg/8bbb36756c1434eab977ee29a7fcc08933306568d61b9be4406e3da406272cc0.webp"
+                                alt=" " class="avatar__44b0c" aria-hidden="true">
+                        </div>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="title decorating-text">
+                        <p>Navigation</p>
+                        <div></div>
+                    </div>
+                    <div class="rest" id="navigation">
+                        <a href="index.html">
+                            <div style="width: 98%"">home</div>
+                        </a>
+                        <a href="new.html">
+                            <div style="width: 98%"">new stuff^^</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div id="middle-section">
+                <div class="container">
+                    <div class=" ascii-art" style="">
+                        $$\                 $$\           
+                        $$ |                $$ |          
+     $$$$$$\   $$$$$$$\ $$$$$$$\   $$$$$$\  $$ |$$\   $$\ 
+     \____$$\ $$  _____|$$  __$$\ $$  __$$\ $$ |$$ |  $$ |
+     $$$$$$$ |\$$$$$$\  $$ |  $$ |$$$$$$$$ |$$ |$$ |  $$ |
+    $$  __$$ | \____$$\ $$ |  $$ |$$   ____|$$ |$$ |  $$ |
+    \$$$$$$$ |$$$$$$$  |$$ |  $$ |\$$$$$$$\ $$ |\$$$$$$$ |
+     \_______|\_______/ \__|  \__| \_______|\__| \____$$ |
+                                               $$\   $$ |
+                                               \$$$$$$  |
+                                                 \______/ 
+                    </div>
+                </div>
+                <div class="container" id="mobile-only">
+                    <div class="title decorating-text">
+                        <p>Navigation</p>
+                        <div></div>
+                    </div>
+                    <div class="rest" id="navigation">
+                        <a href="index.html">
+                            <div>home</div>
+                        </a>
+                        <a href="new.html">
+                            <div>new stuff^^</div>
+                        </a>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="title decorating-text">
+                        <p>History</p>
+                        <div></div>
+                    </div>
+                    <div id="about-me" class="rest">
+                        <p>
+                            This website has been through some things <br>
+                            initially having selfhosted it on my own machine <br>
+                            running a fedora server under a proxmox hyprvisor, <br>
+                            and running a webserver under nginx and eventually <br>
+                            incorperating anubis to ward off against bot traffic <br><br>
+                            However after a while of having run my main machine on <br>
+                            the same proxmox instalation, and playing games with <br>
+                            the limitations a setup like this imposes, such as <br>
+                            caching issues and hyperthreading being unusable due <br>
+                            to the hyprvisor being unaware of the topolagy I <br>
+                            desicded to not run my main desktop on it <br><br>
+                            Now with this website running on a vps in a very <br>
+                            similar setup albiet now without the threat of a ddos <br>
+                            and my main desktop running a bit quicker on bare metal 
+                        </p>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="title decorating-text">
+                        <p>Experince</p>
+                        <div></div>
+                    </div>
+                    <div class="rest">
+                        <p>
+                            Currently studying Mechanical Engineering <br>
+                            --learning python, microcircuit design with Arduino's <br><br>
+                            Self learning web design & hosting <br>
+                            Daily driving linux (cursed in no good CAD software here)
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div id="right-section">
+                <div class="container" >
+                    <div class="title decorating-text">
+                        <p>Neko gen</p>
+                        <div></div>
+                    </div>
+                    <div class="rest" style="margin-top: 10px;">
+                        <div id="image-container" class="image-container" style="align-self: center;">
+                            <p>Loading image...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+            <c>© 2025, Ashley ∙ site licensed under <a
+                    href="https://github.com/grimtomic/grimtomic/blob/main/LICENSE">&#8192;Apache-2.0</a>&#8192;∙&#8192;<a
+                    href="https://github.com/grimtomic/grimtomic/tree/main">Source</a></c>
+        </footer>
+    </div>
+</body>
+<script>
+    const apiUrl = 'https://nekos.best/api/v2/neko';
+    const imageContainer = document.querySelector('#image-container');
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Network response was not ok (Status: ${response.status})`);
+            }
+            return response.json();
+        })
+        .then(json => {
+            const imageUrl = json.results[0].url;
+            const imgElement = document.createElement('img');
+            imgElement.src = imageUrl;
+            imgElement.alt = 'Image from nekos.best API'; 
+            imageContainer.innerHTML = '';
+            imageContainer.appendChild(imgElement);
+        })
+        .catch(error => {
+            imageContainer.textContent = 'Failed to load image.';
+            console.error('There was a problem with the fetch operation:', error);
+        });
+</script>
