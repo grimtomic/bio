@@ -100,10 +100,10 @@ c {
 }
 #navigation {
   display: flex;
-  height: ;
 }
 #navigation div {
   background-color: var(--site-background-colour-v2);
+  width: 98%;
 }
 
 #footer {
