@@ -7,14 +7,24 @@ tempCanvas.width = charSize * numChars;
 tempCanvas.height = charSize;
 const ctx = tempCanvas.getContext("2d");
 
-ctx.fillStyle = "#000000";
+const lerp = (c1, c2, t) => c1.map((c, i) => Math.round(c + (c2[i] - c) * t));
+const bg = [40, 40, 40],
+  base = [235, 219, 178],
+  bold = [211, 134, 155];
+
+ctx.fillStyle = `rgb(${bg.join()})`;
 ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-ctx.fillStyle = "#FFFFFF";
 ctx.font = `${charSize * 0.8}px monospace`;
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
 
 for (let i = 0; i < numChars; i++) {
+  let n = i / 9.0;
+  let t = Math.max(0, Math.min(1, (n - 0.1) / 0.8));
+  let int = t * t * (3 - 2 * t);
+  let c =
+    int < 0.5 ? lerp(bg, base, int * 2) : lerp(base, bold, (int - 0.5) * 2);
+  ctx.fillStyle = `rgb(${c.join()})`;
   ctx.fillText(chars[i], i * charSize + charSize / 2, charSize / 2);
 }
 
@@ -69,11 +79,7 @@ const noiseFsSource = `#version 300 es
         float n = noise(noiseUV + time);
         n += 0.5 * noise(noiseUV * 2.0 - time * 1.5);
 
-        n = n / 1.5;
-        n = n * 0.5 + 0.5;
-        n = smoothstep(0.08, 0.8, n);
-
-        fragColor = vec4(clamp(n, 0.0, 1.0), 0.0, 0.0, 1.0);
+        fragColor = vec4(clamp((n / 1.5) * 0.5 + 0.5, 0.0, 1.0), 0.0, 0.0, 1.0);
     }
 `;
 
@@ -81,34 +87,22 @@ const asciiFsSource = `#version 300 es
     precision mediump float;
     uniform sampler2D u_noiseTex;
     uniform sampler2D u_asciiTex;
-    uniform float u_aspect;
+    uniform vec2 u_gridVec;
 
     in vec2 v_uv;
     out vec4 fragColor;
 
     void main() {
-        float n = texture(u_noiseTex, v_uv).r;
-
-        vec2 cellUV = fract(v_uv * vec2(u_aspect * 70.0, 70.0));
-        vec2 texUV = cellUV * 0.6 + 0.2;
+        vec2 gridCoord = v_uv * u_gridVec;
+        float n = texelFetch(u_noiseTex, ivec2(gridCoord), 0).r;
 
         float charIndex = clamp(floor(n * 10.0), 0.0, 9.0);
+        vec2 texUV = fract(gridCoord) * 0.6 + 0.2;
 
         int px = clamp(int(charIndex * 64.0 + texUV.x * 64.0), 0, 639);
         int py = clamp(int((1.0 - texUV.y) * 64.0), 0, 63);
 
-        float charAlpha = texelFetch(u_asciiTex, ivec2(px, py), 0).r;
-
-        const vec3 bgColor = vec3(0.157, 0.157, 0.157);
-        const vec3 baseText = vec3(0.922, 0.859, 0.698);
-        const vec3 boldText = vec3(0.827, 0.525, 0.608);
-
-        float intensity = smoothstep(0.1, 0.9, n);
-        vec3 lowerGradient = mix(bgColor, baseText, intensity * 2.0);
-        vec3 upperGradient = mix(baseText, boldText, (intensity - 0.5) * 2.0);
-        vec3 currentTextColor = mix(lowerGradient, upperGradient, step(0.5, intensity));
-
-        fragColor = vec4(mix(bgColor, currentTextColor, charAlpha), 1.0);
+        fragColor = texelFetch(u_asciiTex, ivec2(px, py), 0);
     }
 `;
 
@@ -155,7 +149,7 @@ gl.framebufferTexture2D(
 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
 const noiseTimeLoc = gl.getUniformLocation(noiseProgram, "u_time");
-const asciiAspectLoc = gl.getUniformLocation(asciiProgram, "u_aspect");
+const asciiGridVecLoc = gl.getUniformLocation(asciiProgram, "u_gridVec");
 const asciiNoiseTexLoc = gl.getUniformLocation(asciiProgram, "u_noiseTex");
 const asciiCharTexLoc = gl.getUniformLocation(asciiProgram, "u_asciiTex");
 
@@ -163,18 +157,24 @@ const RENDER_SCALE = 0.75;
 const GRID_Y = 70;
 let gridX = 70;
 let resizeTimer;
+let isWideEnough = window.innerWidth >= 910;
 
 function stretchCanvas() {
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
+  isWideEnough = window.innerWidth >= 910;
+  canvas.style.display = isWideEnough ? "block" : "none";
+  if (isWideEnough) {
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+  }
 }
 
 function reallocateVRAM() {
+  if (!isWideEnough) return;
+
   canvas.width = Math.floor(window.innerWidth * RENDER_SCALE);
   canvas.height = Math.floor(window.innerHeight * RENDER_SCALE);
 
-  const aspect = canvas.width / canvas.height;
-  gridX = Math.ceil(GRID_Y * aspect);
+  gridX = Math.ceil(GRID_Y * (canvas.width / canvas.height));
 
   gl.bindTexture(gl.TEXTURE_2D, fboTexture);
   gl.texImage2D(
@@ -193,7 +193,9 @@ function reallocateVRAM() {
 window.addEventListener("resize", () => {
   stretchCanvas();
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(reallocateVRAM, 200);
+  if (isWideEnough) {
+    resizeTimer = setTimeout(reallocateVRAM, 200);
+  }
 });
 
 stretchCanvas();
@@ -219,7 +221,8 @@ const NOISE_SPEED = 0.001;
 
 function render(time) {
   requestAnimationFrame(render);
-  if (!isVisible) return;
+
+  if (!isVisible || !isWideEnough) return;
 
   const deltaTime = time - lastFrameTime;
   if (deltaTime < frameDelay) return;
@@ -234,7 +237,7 @@ function render(time) {
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.viewport(0, 0, canvas.width, canvas.height);
   gl.useProgram(asciiProgram);
-  gl.uniform1f(asciiAspectLoc, canvas.width / canvas.height);
+  gl.uniform2f(asciiGridVecLoc, gridX, GRID_Y);
 
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, fboTexture);
